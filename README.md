@@ -5,7 +5,7 @@ Implementation of [OpenAI Embedding & Semantic Search using Vector data](https:/
 # Tech Stack
 - Node with vanilla javascript
 - Supabase for quick backend service
-- OpenAI for content generation
+- OpenAI for embedding generation
 
 # How to get started
 - Create [Supabase](https://supabase.com/) account
