@@ -1,8 +1,14 @@
 import fs from "fs";
 import OpenAI from "openai";
 import { supabase } from "./supabase.js";
+import readline from "readline";
 import { config } from "dotenv";
 config();
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -79,28 +85,38 @@ async function searchVectorInSupabase(embedding) {
       match_count: 5, // Choose the number of matches
     });
 
-    return response["data"]
+    return response["data"];
   } catch (error) {
     console.error("Error executing search query:", error);
   }
 }
 
-function GetInputQueryAndSearchVectorDB() {
+async function GetInputQueryAndSearchVectorDB(query) {
   try {
-    var query = "Who is the CEO of Twitter";
-
-    console.log("Question:", query)
-
     // Step 1: Embed the user query to convert to Vector
-    embedText(query).then((embedding) => {
-      // Step 2: Search the vector DB for the embeded vector query
-    searchVectorInSupabase(embedding).then((response)=>{
-        console.log(response)
-    })
-    });
+    const embedding = await embedText(query);
+    // Step 2: Search the vector DB for the embeded vector query
+    const results = await searchVectorInSupabase(embedding);
+
+    return results;
   } catch (error) {
     console.error(error);
   }
 }
 
-GetInputQueryAndSearchVectorDB();
+function getQueryAndSearch() {
+  rl.question('Please enter your query (or type "exit" to quit): ', (query) => {
+    if (query.toLowerCase() === "exit") {
+      rl.close();
+      return;
+    }
+
+    console.log("Searching, please wait...");
+    GetInputQueryAndSearchVectorDB(query).then((response) => {
+      console.log(response);
+      getQueryAndSearch();
+    });
+  });
+}
+
+getQueryAndSearch();
